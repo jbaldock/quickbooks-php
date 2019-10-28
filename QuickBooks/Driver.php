@@ -1469,7 +1469,7 @@ abstract class QuickBooks_Driver
 	{
 		return $this->_oauthRequestWriteV1($app_tenant, $token, $token_secret);
 	}
-
+	
 	abstract protected function _oauthRequestWriteV1($app_tenant, $token, $token_secret);
 
 	public function oauthRequestResolveV1($token)

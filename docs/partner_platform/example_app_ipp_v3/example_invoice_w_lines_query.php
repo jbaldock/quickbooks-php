@@ -1,6 +1,6 @@
 <?php
 
-require_once dirname(__FILE__) . '/config.php';
+require_once dirname(__FILE__) . '/config_oauthv2.php';
 
 require_once dirname(__FILE__) . '/views/header.tpl.php';
 
@@ -22,7 +22,7 @@ foreach ($invoices as $Invoice)
 	$num_lines = $Invoice->countLine(); 		// How many line items are there?
 	for ($i = 0; $i < $num_lines; $i++)
 	{
-		$Line = $Invoice->getLine(0);
+		$Line = $Invoice->getLine($i);
 		
 		// Let's find out what item this uses
 		if ($Line->getDetailType() == 'SalesItemLineDetail')
@@ -41,13 +41,13 @@ foreach ($invoices as $Invoice)
 	print("\n\n\n");
 }
 
-/*
-print("\n\n\n\n");
-print('Request [' . $IPP->lastRequest() . ']');
-print("\n\n\n\n");
-print('Response [' . $IPP->lastResponse() . ']');
-print("\n\n\n\n");
-*/
+
+//print("\n\n\n\n");
+//print('Request [' . $IPP->lastRequest() . ']');
+//print("\n\n\n\n");
+//print('Response [' . $IPP->lastResponse() . ']');
+//print("\n\n\n\n");
+
 
 ?>
 
