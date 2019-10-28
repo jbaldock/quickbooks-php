@@ -28,7 +28,7 @@ QuickBooks_Loader::load('/QuickBooks/QBXML/Object/CreditMemo/CreditMemoLine.php'
  * QuickBooks object class
  */
 
-class Quickbooks_QBXML_Object_CreditMemo extends QuickBooks_QBXML_Object
+class QuickBooks_QBXML_Object_CreditMemo extends QuickBooks_QBXML_Object
 {
  	/**
 	 * Create a new QuickBooks_Object_Customer object
@@ -39,6 +39,43 @@ class Quickbooks_QBXML_Object_CreditMemo extends QuickBooks_QBXML_Object
 	public function __construct($arr = array())
 	{
 		parent::__construct($arr);
+	}
+	
+	/**
+	 * Set the TxnID of the Class
+	 *
+	 * @param string $TxnID
+	 * @return boolean
+	 */
+	public function setTxnID($TxnID)
+	{
+		return $this->set('TxnID', $TxnID);
+	}
+	
+	/**
+	 * Alias of {@link QuickBooks_Object_ReceivePayment::setTxnID()}
+	 */
+	public function setTransactionID($TxnID)
+	{
+		return $this->setTxnID($TxnID);
+	}
+	
+	/**
+	 * Get the ListID of the Class
+	 *
+	 * @return string
+	 */
+	public function getTxnID()
+	{
+		return $this->get('TxnID');
+	}
+	
+	/**
+	 * Alias of {@link QuickBooks_Object_ReceivePayment::getTxnID()}
+	 */
+	public function getTransactionID()
+	{
+		return $this->getTxnID();
 	}
 
 	public function setCustomerListID($ListID)
@@ -182,6 +219,16 @@ class Quickbooks_QBXML_Object_CreditMemo extends QuickBooks_QBXML_Object
 	{
 		return $this->addListItem('CreditMemoLine', $obj);
 	}
+	
+	public function getCreditMemoLine($i)
+	{
+		return $this->getListItem('CreditMemoLine', $i);
+	}
+	
+	public function listCreditMemoLines()
+	{
+		return $this->getList('CreditMemoLine');
+	}
 
 	public function setShipMethodName($name)
 	{
@@ -202,6 +249,16 @@ class Quickbooks_QBXML_Object_CreditMemo extends QuickBooks_QBXML_Object
 	{
 		return $this->get('ShipMethodRef ListID');
 	}
+	
+	public function setSalesTaxItemListID($ListID)
+	{
+		return $this->set('ItemSalesTaxRef ListID', $ListID);
+	}
+	
+	public function getSalesTaxItemListID()
+	{
+		return $this->get('ItemSalesTaxRef ListID');
+	}
 
 	public function setSalesTaxItemFullName($name)
 	{
@@ -211,6 +268,92 @@ class Quickbooks_QBXML_Object_CreditMemo extends QuickBooks_QBXML_Object
 	public function getSalesTaxItemName()
 	{
 		return $this->get('ItemSalesTaxRef FullName');
+	}
+	
+	public function getSalesTaxPercentage()
+	{
+		return $this->getAmountType('SalesTaxPercentage');
+	}
+	
+	public function getSalesTaxTotal()
+	{
+		return $this->getAmountType('SalesTaxTotal');
+	}
+	
+	public function setMemo($memo)
+	{
+		return $this->set('Memo', $memo);
+	}
+	
+	public function getMemo()
+	{
+		return $this->get('Memo');
+	}
+	/**
+	 *
+	 *
+	 */
+	public function addAppliedToTxn($obj)
+	{
+		return $this->addListItem('LinkedTxn', $obj);
+	}
+	
+	public function getAppliedToTxn($i)
+	{
+		return $this->getListItem('LinkedTxn', $i);
+	}
+	
+	public function listAppliedToTxns()
+	{
+		return $this->getList('LinkedTxn');
+	}
+	
+	public function getTotalAmount()
+	{
+		return $this->getAmountType('TotalAmount');
+	}
+	
+	public function getCreditRemaining()
+	{
+		return $this->getAmountType('CreditRemaining');
+	}
+	
+	public function getTermsName()
+	{
+		return $this->get('TermsRef FullName');
+	}
+	
+	public function getTermsListID()
+	{
+		return $this->get('TermsRef ListID');
+	}
+	
+	/**
+	 * Set an credit as pending
+	 *
+	 * @param boolean $pending
+	 * @return boolean
+	 */
+	public function setIsPending($pending)
+	{
+		return $this->setBooleanType('IsPending', $pending);
+	}
+	
+	public function getIsPending()
+	{
+		return $this->getBooleanType('IsPending');
+	}
+	
+	/**
+	 * Get the due date for the credit memo
+	 *
+	 * @param string $format	The format to return the date in (as for {@link http://www.php.net/date})
+	 * @return string
+	 */
+	public function getDueDate($format = 'Y-m-d')
+	{
+		//return date($format, strtotime($this->get('DueDate')));
+		return $this->getDateType('DueDate', $format);
 	}
 
 	public function asList($request)
@@ -246,16 +389,21 @@ class Quickbooks_QBXML_Object_CreditMemo extends QuickBooks_QBXML_Object
 		switch ($root)
 		{
 			case QUICKBOOKS_ADD_CREDITMEMO:
-
-				foreach ($object['CreditMemoLineAdd'] as $key => $obj)
+				if (!empty($object['CreditMemoLineAdd']))
 				{
-					$obj->setOverride('CreditMemoLineAdd');
+					foreach ($object['CreditMemoLineAdd'] as $key => $obj)
+					{
+						$obj->setOverride('CreditMemoLineAdd');
+					}
 				}
 				break;
 			case QUICKBOOKS_MOD_CREDITMEMO:
-				foreach ($object['CreditMemoLineAdd'] as $key => $obj)
+				if (!empty($object['CreditMemoLineMod']))
 				{
-					$obj->setOverride('CreditMemoLineMod');
+					foreach ($object['CreditMemoLineMod'] as $key => $obj)
+					{
+						$obj->setOverride('CreditMemoLineMod');
+					}
 				}
 				break;
 		}
