@@ -98,6 +98,11 @@ class QuickBooks_QBXML_Object_PaymentMethod extends QuickBooks_QBXML_Object
 		return $this->get('PaymentMethodType');
 	}
 	
+	public function setPaymentMethodType()
+	{
+		return $this->set('PaymentMethodType');
+	}
+	
 	/**
 	 * Perform any needed clean-up of the object data members
 	 * 

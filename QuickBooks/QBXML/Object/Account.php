@@ -131,7 +131,7 @@ class QuickBooks_QBXML_Object_Account extends QuickBooks_QBXML_Object
 	 */
 	public function setIsActive($value)
 	{
-		return $this->set('IsActive', (boolean) $value);
+		return $this->setBooleanType('IsActive', $value);
 	}
 	
 	/**
@@ -146,7 +146,7 @@ class QuickBooks_QBXML_Object_Account extends QuickBooks_QBXML_Object
 	
 	public function setAccountType($type)
 	{
-		return $this->setBooleanType('AccountType', $type);
+		return $this->set('AccountType', $type);
 	}
 	
 	public function getAccountType()

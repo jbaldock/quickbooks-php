@@ -83,6 +83,30 @@ abstract class QuickBooks_IPP_Service
 		
 		return $IPP->useIDSParser((boolean) $true_or_false);
 	}
+
+	protected function _entitlements($Context, $realmID)
+	{
+		$IPP = $Context->IPP();
+
+		// Send the data to IPP 
+		//                  $Context, $realm, $resource, $optype, $xml = '', $ID = null
+		$return = $IPP->IDS($Context, $realmID, null, QuickBooks_IPP_IDS::OPTYPE_ENTITLEMENTS);
+		
+		$this->_setLastRequestResponse($Context->lastRequest(), $Context->lastResponse());
+		$this->_setLastDebug($Context->lastDebug());
+		
+		if ($IPP->errorCode() != QuickBooks_IPP::ERROR_OK)
+		{
+			$this->_setError(
+				$IPP->errorCode(), 
+				$IPP->errorText(), 
+				$IPP->errorDetail());
+			
+			return false;
+		}
+		
+		return $return;
+	}
 	
 	protected function _cdc($Context, $realmID, $entities, $timestamp, $page, $size)
 	{
@@ -415,6 +439,7 @@ abstract class QuickBooks_IPP_Service
 	protected function _add($Context, $realmID, $resource, $Object)
 	{
 		$IPP = $Context->IPP();
+		$IPP->setContentType("application/xml");
 		
 		switch ($IPP->version())
 		{
@@ -638,6 +663,15 @@ abstract class QuickBooks_IPP_Service
 		return false;
 	}
 
+	protected function _pdf($Context, $realmID, $resource, $ID)
+	{
+		// v3 only
+		$IPP = $Context->IPP();
+		$IPP->useIDSParser(false); // We want raw pdf output
+
+		return $IPP->IDS($Context, $realmID, $resource, QuickBooks_IPP_IDS::OPTYPE_PDF, null, $ID);
+	}
+
 	/**
 	 * @deprecated 			Use _update() instead
 	 */
@@ -828,9 +862,10 @@ abstract class QuickBooks_IPP_Service
 	{
 		$IPP = $Context->IPP();
 	
-		// Send the data to IPP 
-		//$return = $IPP->IDS($Context, $realmID, null, QuickBooks_IPP_IDS::OPTYPE_QUERY, str_replace('=', '%3D', $query));
-		$return = $IPP->IDS($Context, $realmID, null, QuickBooks_IPP_IDS::OPTYPE_QUERY, urlencode($query));
+		// jbaldock 2016-06-24 - Add the minor version 4 to the url
+		$query = urlencode($query);
+		$query .= "&minorversion=4";
+		$return = $IPP->IDS($Context, $realmID, null, QuickBooks_IPP_IDS::OPTYPE_QUERY, $query);
 		$this->_setLastRequestResponse($Context->lastRequest(), $Context->lastResponse());
 		$this->_setLastDebug($Context->lastDebug());
 		
@@ -994,4 +1029,34 @@ abstract class QuickBooks_IPP_Service
 		$this->_errtext = $errtext;
 		$this->_errdetail = $errdetail;
 	}	
+	/**
+	 * Custom method to pass a JSON formatted request to QB API
+	 * Expects that Object is already formatted correctly and simply encodes it and passes it through
+	 * This is a temporary solution for use with QB API's that do not support XML (ie. TaxService) and should be redone properly
+	 * @author jbaldock 2016-07-28
+	 */
+	protected function _add_json($Context, $realmID, $resource, $Object)
+	{
+		$IPP = $Context->IPP();
+		$xml = json_encode($Object);
+		
+		// Send the data to IPP 
+		$IPP->setContentType("application/json");
+		$IPP->useIDSParser(false); // Do not parse the response because its JSON and will get messed up anyway
+		$return = $IPP->IDS($Context, $realmID, $resource, QuickBooks_IPP_IDS::OPTYPE_ADD, $xml);
+		$this->_setLastRequestResponse($Context->lastRequest(), $Context->lastResponse());
+		$this->_setLastDebug($Context->lastDebug());
+		
+		if ($IPP->errorCode() != QuickBooks_IPP::ERROR_OK)
+		{
+			$this->_setError(
+				$IPP->errorCode(), 
+				$IPP->errorText(), 
+				$IPP->errorDetail());
+			
+			return false;
+		}
+		
+		return json_decode($return);
+	}
 }

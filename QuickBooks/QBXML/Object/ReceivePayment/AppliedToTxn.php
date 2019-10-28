@@ -66,7 +66,18 @@ class QuickBooks_QBXML_Object_ReceivePayment_AppliedToTxn extends QuickBooks_QBX
 		
 	}
 	
-	public function getPaymentAmount($amount)
+	// jbaldock 2016-11-28 - Added this as the AppliedToTxn object seems to have Amount, not PaymentAmount
+	public function getAmount()
+	{
+		return $this->getAmountType('Amount');
+	}
+	
+	public function setAmount($amount)
+	{
+		return $this->setAmountType('Amount', $amount);
+	}
+	
+	public function getPaymentAmount()
 	{
 		return $this->getAmountType('PaymentAmount');
 	}
@@ -84,6 +95,38 @@ class QuickBooks_QBXML_Object_ReceivePayment_AppliedToTxn extends QuickBooks_QBX
 	public function getDiscountAmount()
 	{
 		return $this->getDiscountAmount('DiscountAmount');
+	}
+	
+	// Methods for setting/getting the Credit Txn associated to this payment
+	
+	public function setCreditTxnID($TxnID)
+	{
+		return $this->set('SetCredit TxnID', $TxnID);
+	}
+	
+	public function setCreditAmount($amount)
+	{
+		return $this->setAmountType('SetCredit AppliedAmount', $amount);
+	}
+	
+	public function setCreditOverride($override)
+	{
+		return $this->setBooleanType('SetCredit Override', $override);
+	}
+	
+	public function getCreditTxnID()
+	{
+		return $this->get('SetCredit TxnID');
+	}
+	
+	public function getCreditAmount()
+	{
+		return $this->getAmountType('SetCredit AppliedAmount');
+	}
+	
+	public function getCreditOverride()
+	{
+		return $this->getBooleanType('SetCredit Override');
 	}
 	
 	/**

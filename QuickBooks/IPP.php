@@ -245,6 +245,12 @@ class QuickBooks_IPP
 	 */
 	protected $_ids_version;
 	
+	/**
+	 * Defines the content type of the request
+	 *
+	 */
+	protected $_contentType;
+	
 	public function __construct($dsn = null, $encryption_key = null, $config = array(), $log_level = QUICKBOOKS_LOG_NORMAL)
 	{
 		// Are we in sandbox mode?
@@ -503,6 +509,11 @@ class QuickBooks_IPP
 		
 		return $this->_baseurl;
 	}
+
+	public function authcreds()
+	{
+		return $this->_authcred;
+	}
 	
 	/**
 	 * Set the authorization mode for HTTP requests (Federated, or OAuth)
@@ -698,6 +709,7 @@ class QuickBooks_IPP
 		return $response;
 	}
 	
+	/*
 	public function getEntitlementValues($Context)
 	{
 		$url = 'https://workplace.intuit.com/db/' . $this->_dbid;
@@ -723,7 +735,8 @@ class QuickBooks_IPP
 			
 		return $this->_IPP($Context, $url, $action, $xml);
 	}
-	
+	*/
+
 	public function provisionUser($Context, $email, $fname, $lname, $roleid = null, $udata = null)
 	{
 		$url = 'https://workplace.intuit.com/db/' . $this->_dbid;
@@ -1015,22 +1028,30 @@ class QuickBooks_IPP
 		$post = false;
 		$xml = null;
 		$query = null;
-
-		if ($optype == QuickBooks_IPP_IDS::OPTYPE_ADD or $optype == QuickBooks_IPP_IDS::OPTYPE_MOD)	
+		// jbaldock 2016-06-24 - Add the minor version 4 to the url
+		if ($optype == QuickBooks_IPP_IDS::OPTYPE_ADD or $optype == QuickBooks_IPP_IDS::OPTYPE_MOD) 
 		{
 			$post = true;
 			$url = $this->baseURL() . '/company/' . $realm . '/' . strtolower($resource);
 			$xml = $xml_or_query;
+			$url .= "?minorversion=4"; // this is the only addition
 		}
 		else if ($optype == QuickBooks_IPP_IDS::OPTYPE_QUERY)
 		{
 			$post = false;
 			$url = $this->baseURL() . '/company/' . $realm . '/query?query=' . $xml_or_query;
+			//$url .= "?minorversion=4"; // this is the only addition
+			// Note: we don't want to pass 'minorversion' here because it'll end up in there twice and Quickbooks API will ignore it completely. 
 		}
 		else if ($optype == QuickBooks_IPP_IDS::OPTYPE_CDC)
 		{
 			$post = false;
 			$url = $this->baseURL() . '/company/' . $realm . '/cdc?entities=' . implode(',', $xml_or_query[0]) . '&changedSince=' . $xml_or_query[1];
+		}
+		else if ($optype == QuickBooks_IPP_IDS::OPTYPE_ENTITLEMENTS)
+		{
+			$post = false;
+			$url = 'https://qbo.sbfinance.intuit.com/manage/entitlements/v3/' . $realm;
 		}
 		else if ($optype == QuickBooks_IPP_IDS::OPTYPE_DELETE)
 		{
@@ -1040,9 +1061,20 @@ class QuickBooks_IPP
 		}
 		else if ($optype == QuickBooks_IPP_IDS::OPTYPE_VOID)
 		{
+			$qs = '?operation=void';        // Used for invoices... 
+			if ($resource == QuickBooks_IPP_IDS::RESOURCE_PAYMENT)    // ... and something different used for payments *sigh*
+			{
+				$qs = '?operation=update&include=void';
+			}
+
 			$post = true;
-			$url = $this->baseURL() . '/company/' . $realm . '/' . strtolower($resource) . '?operation=void';
+			$url = $this->baseURL() . '/company/' . $realm . '/' . strtolower($resource) . $qs;
 			$xml = $xml_or_query;
+		}
+		else if ($optype == QuickBooks_IPP_IDS::OPTYPE_PDF)
+		{
+			$post = false;
+			$url = $this->baseURL() . '/company/' . $realm . '/' . strtolower($resource) . '/' . $ID . '/pdf';
 		}
 
 		$response = $this->_request($Context, QuickBooks_IPP::REQUEST_IDS, $url, $optype, $xml, $post);
@@ -1470,6 +1502,10 @@ class QuickBooks_IPP
 				}
 			}
 		}
+		
+		if (!is_null($this->_contentType)) {
+			$headers['Content-Type'] = $this->_contentType;
+		}
 
 		// Authorization stuff
 		if ($this->_authmode == QuickBooks_IPP::AUTHMODE_OAUTH)
@@ -1522,6 +1558,11 @@ class QuickBooks_IPP
 					// It's an XML body, we don't sign that
 					$signdata = null;
 				}
+				elseif ($this->_contentType == "application/json") {
+					// @author jbaldock 2016-07-28 added to support JSON requests
+					// It's a JSON body, we don't sign that
+					$signdata = null;
+				}
 				else
 				{
 					// It's form-encoded data, parse it so we can sign it 
@@ -1555,6 +1596,11 @@ class QuickBooks_IPP
 					
 					if ($data and $data[0] == '<')
 					{
+						// Do nothing
+					}
+					elseif ($this->_contentType == "application/json") {
+						// @author jbaldock 2016-07-28 added to support JSON requests
+						// It's a JSON body, we don't sign that
 						// Do nothing
 					}
 					else
@@ -1762,5 +1808,12 @@ class QuickBooks_IPP
 		}
 		
 		$this->_last_debug[$class] = array_merge($existing, $arr);
+	}
+	/**
+	 * Method to set the content type and override the defaults used for XML or plain GET queries
+	 * @author jbaldock 2016-07-28 added to support JSON requests
+	**/
+	public function setContentType($contentType) {
+		$this->_contentType = $contentType;
 	}
 }
