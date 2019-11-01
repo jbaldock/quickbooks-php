@@ -38,12 +38,16 @@ class QuickBooks_IPP_IDS
 
 	const OPTYPE_PDF = 'PDF';
 
+	const OPTYPE_DOWNLOAD = 'DOWNLOAD';
+
 	const OPTYPE_QUERY = 'Query';
 
 	const OPTYPE_CDC = 'ChangeDataCapture';
 
 	const OPTYPE_ENTITLEMENTS = 'Entitlements';
 	
+	const OPTYPE_SEND = 'Send';
+
 	/**
 	 * This is not a real operation type in IDS terms, but is neccessary to distinguish between queries and findById in QuickBooks Online in IDS v2.
 	 */
@@ -93,7 +97,9 @@ class QuickBooks_IPP_IDS
 	const RESOURCE_ACCOUNT = 'Account';
 	
 	const RESOURCE_BILL = 'Bill';
-	
+
+    const RESOURCE_DEPOSIT = 'Deposit';
+
 	const RESOURCE_BILLPAYMENT = 'BillPayment';
 	
 	const RESOURCE_BILLPAYMENTCREDITCARD = 'BillPaymentCreditCard';
@@ -117,7 +123,9 @@ class QuickBooks_IPP_IDS
 	const RESOURCE_DEPARTMENT = 'Department';
 	
 	const RESOURCE_DISCOUNT = 'Discount';
-	
+
+	const RESOURCE_DOWNLOAD = 'Download';
+
 	const RESOURCE_EMPLOYEE = 'Employee';
 	
 	const RESOURCE_ESTIMATE = 'Estimate';

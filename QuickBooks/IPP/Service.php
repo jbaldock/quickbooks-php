@@ -495,12 +495,12 @@ abstract class QuickBooks_IPP_Service
 		//$Object->unsetDBAName();
 		
 		$unsets = array(
-			'Id', 
-			'SyncToken', 
-			'MetaData', 
-			'ExternalKey', 
-			'Synchronized', 
-			'PartyReferenceId', 
+			'Id',
+			'SyncToken',
+			'MetaData',
+			'ExternalKey',
+			'Synchronized',
+			'PartyReferenceId',
 			'SalesTaxCodeId', 		// @todo These are customer/vendor specific and probably shouldn't be here
 			'SalesTaxCodeName',
 			'OpenBalanceDate', 
@@ -541,8 +541,8 @@ abstract class QuickBooks_IPP_Service
 		if ($IPP->errorCode() != QuickBooks_IPP::ERROR_OK)
 		{
 			$this->_setError(
-				$IPP->errorCode(), 
-				$IPP->errorText(), 
+				$IPP->errorCode(),
+				$IPP->errorText(),
 				$IPP->errorDetail());
 			
 			return false;
@@ -560,8 +560,8 @@ abstract class QuickBooks_IPP_Service
 		//	the entire object even though we know the Id of the object that we 
 		//	want to delete... *sigh* 
 		$objects = $this->_query($Context, $realmID, "SELECT * FROM " . $resource . " WHERE Id = '" . QuickBooks_IPP_IDS::usableIDType($ID) . "' ");
-		
-		if (isset($objects[0]) and 
+
+		if (isset($objects[0]) and
 			is_object($objects[0]))
 		{
 			$Object = $objects[0];
@@ -589,8 +589,8 @@ abstract class QuickBooks_IPP_Service
 			if ($IPP->errorCode() != QuickBooks_IPP::ERROR_OK)
 			{
 				$this->_setError(
-					$IPP->errorCode(), 
-					$IPP->errorText(), 
+					$IPP->errorCode(),
+					$IPP->errorText(),
 					$IPP->errorDetail());
 				
 				return false;
@@ -600,7 +600,7 @@ abstract class QuickBooks_IPP_Service
 		}
 
 		$this->_setError(
-			QuickBooks_IPP::ERROR_INTERNAL, 
+			QuickBooks_IPP::ERROR_INTERNAL,
 			'Could not find ' . $resource . ' ' . QuickBooks_IPP_IDS::usableIDType($ID) . ' to delete.',
 			'Could not find ' . $resource . ' ' . QuickBooks_IPP_IDS::usableIDType($ID) . ' to delete.');
 		
@@ -670,6 +670,38 @@ abstract class QuickBooks_IPP_Service
 		$IPP->useIDSParser(false); // We want raw pdf output
 
 		return $IPP->IDS($Context, $realmID, $resource, QuickBooks_IPP_IDS::OPTYPE_PDF, null, $ID);
+	}
+
+	protected function _download($Context, $realmID, $resource, $ID)
+	{
+		// v3 only
+		$IPP = $Context->IPP();
+		$IPP->useIDSParser(false); // We want raw pdf output
+
+		return $IPP->IDS($Context, $realmID, $resource, QuickBooks_IPP_IDS::OPTYPE_DOWNLOAD, null, $ID);
+	}
+
+	protected function _send($Context, $realmID, $resource, $ID)
+	{
+		// v3 only
+		$IPP = $Context->IPP();
+
+		$return = $IPP->IDS($Context, $realmID, $resource, QuickBooks_IPP_IDS::OPTYPE_SEND, null, $ID);
+
+      $this->_setLastRequestResponse($Context->lastRequest(), $Context->lastResponse());
+      $this->_setLastDebug($Context->lastDebug());
+
+      if ($IPP->errorCode() != QuickBooks_IPP::ERROR_OK)
+      {
+         $this->_setError(
+            $IPP->errorCode(),
+            $IPP->errorText(),
+            $IPP->errorDetail());
+
+         return false;
+      }
+
+      return $return;
 	}
 
 	/**
@@ -861,11 +893,10 @@ abstract class QuickBooks_IPP_Service
 	protected function _query($Context, $realmID, $query)
 	{
 		$IPP = $Context->IPP();
-	
-		// jbaldock 2016-06-24 - Add the minor version 4 to the url
-		$query = urlencode($query);
-		$query .= "&minorversion=4";
-		$return = $IPP->IDS($Context, $realmID, null, QuickBooks_IPP_IDS::OPTYPE_QUERY, $query);
+
+		// Send the data to IPP
+		//$return = $IPP->IDS($Context, $realmID, null, QuickBooks_IPP_IDS::OPTYPE_QUERY, str_replace('=', '%3D', $query));
+		$return = $IPP->IDS($Context, $realmID, null, QuickBooks_IPP_IDS::OPTYPE_QUERY, urlencode($query));
 		$this->_setLastRequestResponse($Context->lastRequest(), $Context->lastResponse());
 		$this->_setLastDebug($Context->lastDebug());
 		
@@ -1004,21 +1035,21 @@ abstract class QuickBooks_IPP_Service
 	public function errorDetail()
 	{
 		return $this->_errdetail;
-	}	
-	
-	/** 
+	}
+
+	/**
 	 * Tell whether or not an error occurred
-	 * 
+	 *
 	 * @return boolean
 	 */
 	public function hasErrors()
 	{
 		return $this->_errcode != QuickBooks_IPP::ERROR_OK;
 	}
-	
+
 	/**
 	 * Set an error message
-	 * 
+	 *
 	 * @param integer $errnum	The error number/code
 	 * @param string $errmsg	The text error message
 	 * @return void

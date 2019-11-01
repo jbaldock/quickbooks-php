@@ -753,8 +753,8 @@ class QuickBooks_IPP
 				
 		$xml .= '
 			</qdbapi>';
-		
-		return $this->_IPP($Context, $url, $action, $xml);		
+
+		return $this->_IPP($Context, $url, $action, $xml);
 	}
 	
 	public function createTable($Context, $tname, $pnoun, $udata = null)
