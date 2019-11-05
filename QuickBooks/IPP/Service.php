@@ -439,7 +439,7 @@ abstract class QuickBooks_IPP_Service
 	protected function _add($Context, $realmID, $resource, $Object)
 	{
 		$IPP = $Context->IPP();
-		$IPP->setContentType("application/xml");
+		//WTF is this shit? $IPP->setContentType("application/xml");
 		
 		switch ($IPP->version())
 		{
