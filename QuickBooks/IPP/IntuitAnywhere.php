@@ -359,7 +359,7 @@ class QuickBooks_IPP_IntuitAnywhere
 
 	public function disconnect($app_username, $app_tenant, $force = false)
 	{
-		if ($arr = $this->_driver->oauthLoad($this->_key, $app_username, $app_tenant) and
+		if ($arr = $this->load($app_tenant) and
 			strlen($arr['oauth_access_token']) > 0 and
 			strlen($arr['oauth_access_token_secret']) > 0)
 		{
