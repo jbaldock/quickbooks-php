@@ -1072,7 +1072,7 @@ abstract class QuickBooks_IPP_Service
 		$xml = json_encode($Object);
 		
 		// Send the data to IPP 
-		$IPP->setContentType("application/json");
+		//$IPP->setContentType("application/json");
 		$IPP->useIDSParser(false); // Do not parse the response because its JSON and will get messed up anyway
 		$return = $IPP->IDS($Context, $realmID, $resource, QuickBooks_IPP_IDS::OPTYPE_ADD, $xml);
 		$this->_setLastRequestResponse($Context->lastRequest(), $Context->lastResponse());

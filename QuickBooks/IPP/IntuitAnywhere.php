@@ -359,12 +359,14 @@ class QuickBooks_IPP_IntuitAnywhere
 
 	public function disconnect($app_username, $app_tenant, $force = false)
 	{
-		if ($arr = $this->load($app_tenant))
+        if ($arr = $this->_driver->oauthLoadV2($this->_key, $app_tenant) and
+			strlen($arr['oauth_access_token']) > 0 and
+			strlen($arr['oauth_access_token_secret']) > 0)
 		{
 			$arr['oauth_consumer_key'] = $this->_consumer_key;
 			$arr['oauth_consumer_secret'] = $this->_consumer_secret;
 
-			$retr = $this->_request(QuickBooks_IPP_OAuthv1::METHOD_GET,
+			$retr = $this->_request(QuickBooks_IPP_OAuthv2::METHOD_GET,
 				QuickBooks_IPP_IntuitAnywhere::URL_CONNECT_DISCONNECT,
 				array(),
 				$arr['oauth_access_token'],
