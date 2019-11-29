@@ -246,6 +246,12 @@ class QuickBooks_IPP
 	 */
 	protected $_ids_version;
 
+    /**
+     * Defines the content type of the request
+     *
+     */
+    protected $_contentType;
+
 	public function __construct($dsn, $encryption_key, $config = array(), $log_level = QUICKBOOKS_LOG_NORMAL)
 	{
 		// Are we in sandbox mode?
@@ -1224,6 +1230,10 @@ class QuickBooks_IPP
 			$headers['Content-Type'] = 'text/plain';
 		}
 
+        if (!is_null($this->_contentType)) {
+            $headers['Content-Type'] = $this->_contentType;
+        }
+
 		// Authorization stuff
 		if ($this->_authmode == QuickBooks_IPP::AUTHMODE_OAUTHV2)
 		{
@@ -1263,6 +1273,11 @@ class QuickBooks_IPP
 					// It's an XML body, we don't sign that
 					$signdata = null;
 				}
+                elseif ($this->_contentType == "application/json") {
+                    // @author jbaldock 2016-07-28 added to support JSON requests
+                    // It's a JSON body, we don't sign that
+                    $signdata = null;
+                }
 				else
 				{
 					// It's form-encoded data, parse it so we can sign it
@@ -1284,6 +1299,11 @@ class QuickBooks_IPP
 					{
 						// Do nothing
 					}
+                    elseif ($this->_contentType == "application/json") {
+                        // @author jbaldock 2016-07-28 added to support JSON requests
+                        // It's a JSON body, we don't sign that
+                        // Do nothing
+                    }
 					else
 					{
 						$data = http_build_query($signdata);
@@ -1455,4 +1475,12 @@ class QuickBooks_IPP
 		
 		$this->_last_debug[$class] = array_merge($existing, $arr);
 	}
+
+    /**
+     * Method to set the content type and override the defaults used for XML or plain GET queries
+     * @author jbaldock 2016-07-28 added to support JSON requests
+     **/
+    public function setContentType($contentType) {
+        $this->_contentType = $contentType;
+    }
 }

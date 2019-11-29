@@ -439,7 +439,7 @@ abstract class QuickBooks_IPP_Service
 	protected function _add($Context, $realmID, $resource, $Object)
 	{
 		$IPP = $Context->IPP();
-		//WTF is this shit? $IPP->setContentType("application/xml");
+		$IPP->setContentType("application/xml");
 		
 		switch ($IPP->version())
 		{
@@ -455,8 +455,8 @@ abstract class QuickBooks_IPP_Service
 		$IPP = $Context->IPP();
 
 		$unsets = array(
-			'Id', 
-			);
+			'Id',
+        );
 		
 		foreach ($unsets as $unset)
 		{
@@ -1072,7 +1072,7 @@ abstract class QuickBooks_IPP_Service
 		$xml = json_encode($Object);
 		
 		// Send the data to IPP 
-		//$IPP->setContentType("application/json");
+		$IPP->setContentType("application/json");
 		$IPP->useIDSParser(false); // Do not parse the response because its JSON and will get messed up anyway
 		$return = $IPP->IDS($Context, $realmID, $resource, QuickBooks_IPP_IDS::OPTYPE_ADD, $xml);
 		$this->_setLastRequestResponse($Context->lastRequest(), $Context->lastResponse());
