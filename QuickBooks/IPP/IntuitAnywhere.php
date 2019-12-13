@@ -402,7 +402,7 @@ class QuickBooks_IPP_IntuitAnywhere
 	 *
 	 *
 	 */
-	public function handle($app_tenant)
+	public function handle($app_tenant, $state_in = null)
 	{
 		if ($this->check($app_tenant) and 		// We have tokens ...
 			$this->test($app_tenant))			// ... and they are valid
@@ -507,7 +507,7 @@ class QuickBooks_IPP_IntuitAnywhere
 				}
 				else
 				{
-					$auth_url = $this->_getAuthenticateURLV2($app_tenant, $this->_this_url);
+					$auth_url = $this->_getAuthenticateURLV2($app_tenant, $this->_this_url, $state_in);
 				}
 
 				if (!$auth_url)
@@ -525,12 +525,16 @@ class QuickBooks_IPP_IntuitAnywhere
 		return true;
 	}
 
-	protected function _getAuthenticateURLV2($app_tenant, $url)
+	protected function _getAuthenticateURLV2($app_tenant, $url, $state_in = null)
 	{
 		if ($discover = $this->_discover())
 		{
-			// Write the request to the database
-			$state = md5(mt_rand() . microtime(true));
+		    if($state_in) {
+		        $state = $state_in;
+            } else {
+                // Write the request to the database
+                $state = md5(mt_rand() . microtime(true));
+            }
 
 			$this->_driver->oauthRequestWriteV2($app_tenant, $state);
 
