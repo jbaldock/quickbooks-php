@@ -844,7 +844,7 @@ abstract class QuickBooks_Driver_Sql extends QuickBooks_Driver
 			// Blank passwords *always fail*
 			return null;
 		}
-		else if (strlen(trim($password)) == 32 or strlen(trim($password)) == 40)
+		else if (strlen(trim($password)) != 32 or strlen(trim($password)) != 40)
 		{
 			// Possible *hack* attempt (they're sending us a random hash hoping it will match one of the hashed passwords)
 			return null;
